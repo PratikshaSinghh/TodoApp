@@ -1,46 +1,69 @@
 document.addEventListener("DOMContentLoaded", () => {
-    taskInput = document.querySelector(".task-input input");
 
+    taskInput = document.querySelector(".task-input input");
     todos = JSON.parse(localStorage.getItem("todo-list"));
     taskBox = document.querySelector(".task-box");
     filters = document.querySelectorAll(".filters span");
-    editText = document.querySelector(".text");
     clearAll = document.querySelector(".clear-btn");
-    let editId;
-    let isEditedTask = false;
+    const ul = document.getElementById('myList');
+
+    showTodo("all");
 
     clearAll.addEventListener("click", function () {
-        todos.splice(0, todos.length);
+        todos.splice(0, todos.length); // To remove entire list values and update it in the storage
         localStorage.setItem("todo-list", JSON.stringify(todos));
         showTodo("all");
     });
 
-    showTodo("all");
-
     filters.forEach(btn => {
         btn.addEventListener("click", function () {
-            console.log(btn);
             document.querySelector("span.active").classList.remove("active");
+            //classList property that returns css class names
             btn.classList.add("active");
             showTodo(btn.id);
         });
     });
 
-    taskInput.addEventListener("keyup", function (e) {
-        let userTask = taskInput.value.trim();
-        // let newTask = editText.value.trim();
-        if (e.key == "Enter" && userTask) {
-            if (!isEditedTask) {
-                let taskInfo = { name: userTask, status: "pending" };
-                todos.push(taskInfo);
-            } else {
-                isEditedTask = false;
-
-                todos[editId].name = userTask; //userTask
-                // todos[isEditedTask].name = newTask; //userTask
-
+    ul.addEventListener('click', function (event, id) {
+        id = event.target.parentElement.getAttribute('for')// Label attribute for which has the id    
+        if (event.target.tagName === 'BUTTON') {  //event.target is the button
+            const button = event.target;
+            const label = button.parentNode;
+            if (button.textContent === 'Edit') {
+                const p = label.firstElementChild;//First element of label is the p tag 
+                console.log(p);
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = p.textContent;
+                label.insertBefore(input, p);
+                label.removeChild(p);
+                button.textContent = 'Save';
+            } else if (button.textContent === 'Save') {
+                const input = label.firstElementChild;
+                const span = document.createElement('span')
+                span.textContent = input.value;
+                console.log(span.textContent)
+                label.insertBefore(span, input); //insertBefore (new, existing)
+                label.removeChild(input);
+                button.textContent = 'Edit';
+                //To save value of the input inside the name of the particular id being edited
+                todos[id].name = input.value;
+                localStorage.setItem("todo-list", JSON.stringify(todos));//To update in the localstorage
+                showTodo("all");
             }
-            taskInput.value = "";
+        }
+    });
+
+    taskInput.addEventListener("keyup", function (e) {
+        let userTask = taskInput.value.trim();// value of input box(taskInput), .trim() to ignore empty spaces
+        if (e.key == "Enter" && userTask) { // if value of key is enter and there are no spaces
+            if (!todos) {
+                todos = [];  //if todos is empty then create new array list
+            }
+            // object is declared to store the name and status inside localstorage
+            let taskInfo = { name: userTask, status: "pending" };
+            todos.push(taskInfo); // method push to add the array 
+            taskInput.value = ""; // To display list values 
             localStorage.setItem("todo-list", JSON.stringify(todos));
             showTodo("all");
         }
@@ -52,54 +75,41 @@ function showTodo(filter) {
     if (todos) {
         todos.forEach(function (todo, id) {
             console.log(id, todo);
+            // If status is completed add "checked" attribute else leave it blank
             let isCompleted = todo.status == "completed" ? "checked" : "";
             if (filter == todo.status || filter == "all") {
-                li += `<li class="task">
-            <label for="${id}">
-                <input onclick=updateStatus(this) type="checkbox" id=${id} ${isCompleted}>
-                    <p class="${isCompleted} text" >${todo.name}</p>
-            </label>
-                <div class = "settings">
-                    <ul class = "task-menu">
-                        <button onclick="editTask(${id}, '${todo.name}')">Edit</button>
-                        <button onclick="deleteTask(${id})">Delete</button>
-                    </ul>
-                </div>
-            </li>`;
+                li += `
+                <ul class="task-box" id ="myList">
+                    <li class="task">
+                        <label for="${id}">
+                            <p class="${isCompleted}">${todo.name}</p>
+                            <input onclick=updateStatus(this) type="checkbox" id=${id} ${isCompleted}>
+                            <button>Edit</button>
+                        </label>
+                        <div class = "settings">
+                            <ul class = "task-menu">
+                                <button onclick="deleteTask(${id})">Delete</button>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>`;
             }
         });
     }
     taskBox.innerHTML = li || `You dont have any task here`;
 }
 
-// function editTask(id) {
-//     console.log(id);
-//     isEditedTask = id;
-//     // taskInput.value = todos[id].name;
-//     editText = todos[id].name;
-
-//     console.log(editText);
-// }
-
-function editTask(taskId, taskName){
-
-    console.log(taskId,taskName);
-    // isEditedTask = taskName;
-    editId= taskId;
-    isEditedTask = true;
-
-    taskInput.value = todos[taskId].name;
-}
 function deleteTask(deleteId) {
-    todos.splice(deleteId, 1);
+    todos.splice(deleteId, 1); //To delete just one list 
     localStorage.setItem("todo-list", JSON.stringify(todos));
     showTodo("all");
 }
+
 function updateStatus(selectedTask) {
     let taskName = selectedTask.parentElement.lastElementChild;
     if (selectedTask.checked) {
-        taskName.classList.add("checked");
-        todos[selectedTask.id].status = "completed";
+        taskName.classList.add("checked"); //add checked attribute to the element
+        todos[selectedTask.id].status = "completed"; //update todos status to completed
     } else {
         taskName.classList.remove("checked");
         todos[selectedTask.id].status = "pending";
