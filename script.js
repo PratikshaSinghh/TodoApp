@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const ul = document.getElementById('myList');
 
     showTodo("all");
-
+    
     clearAll.addEventListener("click", function () {
         todos.splice(0, todos.length); // To remove entire list values and update it in the storage
         localStorage.setItem("todo-list", JSON.stringify(todos));
@@ -60,8 +60,11 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!todos) {
                 todos = [];  //if todos is empty then create new array list
             }
+            console.log(taskInput.value)
             // object is declared to store the name and status inside localstorage
             let taskInfo = { name: userTask, status: "pending" };
+            // console.log(todos[id].name)
+            
             todos.push(taskInfo); // method push to add the array 
             taskInput.value = ""; // To display list values 
             localStorage.setItem("todo-list", JSON.stringify(todos));
@@ -81,16 +84,14 @@ function showTodo(filter) {
                 li += `
                 <ul class="task-box" id ="myList">
                     <li class="task">
-                        <label for="${id}">
+                <input onclick=updateStatus(this) type="checkbox" id=${id} ${isCompleted}>
+                        <label for="${id}" class="label">
                             <p class="${isCompleted}">${todo.name}</p>
-                            <input onclick=updateStatus(this) type="checkbox" id=${id} ${isCompleted}>
-                            <button>Edit</button>
+                            <button class="editBtn">Edit</button>
+
                         </label>
-                        <div class = "settings">
-                            <ul class = "task-menu">
-                                <button onclick="deleteTask(${id})">Delete</button>
-                            </ul>
-                        </div>
+                        <button onclick="deleteTask(${id})">Delete</button>
+                        
                     </li>
                 </ul>`;
             }
@@ -107,11 +108,12 @@ function deleteTask(deleteId) {
 
 function updateStatus(selectedTask) {
     let taskName = selectedTask.parentElement.lastElementChild;
+    let check=taskName.parentElement.getElementsByTagName('label')[0].getElementsByTagName('p')[0];
     if (selectedTask.checked) {
-        taskName.classList.add("checked"); //add checked attribute to the element
+        check.classList.add("checked"); //add checked attribute to the element
         todos[selectedTask.id].status = "completed"; //update todos status to completed
     } else {
-        taskName.classList.remove("checked");
+        check.classList.remove("checked");
         todos[selectedTask.id].status = "pending";
     }
     localStorage.setItem("todo-list", JSON.stringify(todos));

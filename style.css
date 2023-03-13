@@ -53,18 +53,31 @@ body{
 .filters span:first-child{
     margin-left: 0;
 }
-.task-box{
-    margin: 0 -20px;
+/* .task-box{
+    margin: 0 20px;
+} */
+.scrollStyle{
+    max-height: 250px;
+    overflow-y: scroll;
 }
 .task-box .task{
     list-style: none;
     font-size: 16px;
     border-bottom: 1px solid #ccc;
-    margin-right: 40px;
+    margin:0 30px 0 -40px;
 }
 .task label{
     display: flex;
 }
 .task label input{
     margin-right: 12px;
+}
+.label{
+    margin-right: 60px;
+}
+.editBtn{
+    height: 20px;
+    display: flex;
+    margin-top: 16px;
+    margin-left: 80px;
 }
